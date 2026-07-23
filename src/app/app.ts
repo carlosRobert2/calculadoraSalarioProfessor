@@ -1,12 +1,13 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Calc } from "./componets/calc/calc";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [Calc],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './app.css',
 })
 export class App {
-  protected readonly title = signal('calsal2');
+  protected readonly title = signal('Calculadora de Remuneração - SEDUC-PA');
 }

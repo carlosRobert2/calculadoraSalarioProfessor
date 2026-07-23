@@ -1,0 +1,325 @@
+<div class="min-h-screen bg-gray-100">
+  <header class="bg-blue-900">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 flex items-center gap-4">
+      <div class="bg-white/10 rounded-xl p-3 flex items-center justify-center">
+        <mat-icon class="!text-white !w-7 !h-7 !text-[28px]">calculate</mat-icon>
+      </div>
+      <div>
+        <h1 class="text-white text-xl sm:text-2xl font-bold">Calculadora de Remuneração</h1>
+        <p class="text-blue-200 text-sm">Estimativa salarial para professores da rede estadual do Pará</p>
+      </div>
+    </div>
+    <div class="h-1.5 bg-green-600"></div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+    <div class="flex gap-3 items-start rounded-lg border border-blue-200 bg-blue-50 p-4">
+      <mat-icon class="!text-blue-700 !w-5 !h-5 !text-[20px] mt-0.5 shrink-0">info</mat-icon>
+      <p class="text-sm leading-relaxed text-blue-900">
+        Os valores apresentados são <strong>estimativas</strong> baseadas nas regras informadas do PCCR da SEDUC-PA. Esta aplicação
+        <strong>não é um sistema oficial</strong> da SEDUC. Para valores oficiais, consulte o setor responsável pela folha de
+        pagamento.
+      </p>
+    </div>
+
+    <mat-card class="!shadow-sm">
+      <mat-card-content>
+        <form [formGroup]="form" (ngSubmit)="calcular()">
+          <div class="divide-y divide-gray-200">
+            <!-- 1. Data de admissão -->
+            <section class="pb-6">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="bg-gray-100 rounded-lg p-2.5 flex items-center justify-center">
+                  <mat-icon class="!text-gray-600 !w-5 !h-5 !text-[20px]">calendar_month</mat-icon>
+                </div>
+                <div>
+                  <h2 class="font-semibold text-gray-800">Data de Admissão</h2>
+                  <p class="text-sm text-gray-500">Início do exercício no serviço público estadual</p>
+                </div>
+              </div>
+
+              <mat-form-field appearance="outline" class="w-full sm:w-64">
+                <mat-label>Data de admissão</mat-label>
+                <input matInput [matDatepicker]="picker" formControlName="dataAdmissao" [max]="hoje" placeholder="DD/MM/AAAA" />
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+                @if (form.get('dataAdmissao')?.touched && form.get('dataAdmissao')?.errors; as erros) {
+                  @if (erros['obrigatoria']) {
+                    <mat-error>Informe a data de admissão.</mat-error>
+                  } @else if (erros['dataFutura']) {
+                    <mat-error>A data de admissão não pode ser uma data futura.</mat-error>
+                  }
+                }
+              </mat-form-field>
+            </section>
+
+            <!-- 2. Carga horária mensal -->
+            <section class="py-6">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="bg-gray-100 rounded-lg p-2.5 flex items-center justify-center">
+                  <mat-icon class="!text-gray-600 !w-5 !h-5 !text-[20px]">schedule</mat-icon>
+                </div>
+                <div>
+                  <h2 class="font-semibold text-gray-800">Carga Horária de Regência</h2>
+                  <p class="text-sm text-gray-500">Total de horas em sala de aula por mês</p>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap items-start gap-3">
+                <mat-form-field appearance="outline" class="w-full sm:w-64">
+                  <mat-label>Carga horária mensal</mat-label>
+                  <input matInput type="number" formControlName="cargaHoraria" placeholder="Ex: 175" />
+                  <span matTextSuffix>&nbsp;h/mês</span>
+                  @if (form.get('cargaHoraria')?.touched && form.get('cargaHoraria')?.errors; as erros) {
+                    @if (erros['obrigatoria']) {
+                      <mat-error>Informe a carga horária mensal em sala de aula.</mat-error>
+                    } @else if (erros['invalida']) {
+                      <mat-error>A carga horária deve ser maior que zero.</mat-error>
+                    } @else if (erros['acimaLimite']) {
+                      <mat-error>A carga horária não pode ultrapassar 220 horas mensais.</mat-error>
+                    }
+                  }
+                </mat-form-field>
+                <span class="text-sm text-gray-500 pt-4">Máximo de <strong>220h</strong> mensais</span>
+              </div>
+            </section>
+
+            <!-- 3. Classe -->
+            <section class="py-6">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="bg-gray-100 rounded-lg p-2.5 flex items-center justify-center">
+                  <mat-icon class="!text-gray-600 !w-5 !h-5 !text-[20px]">work</mat-icon>
+                </div>
+                <div>
+                  <h2 class="font-semibold text-gray-800">Classe</h2>
+                  <p class="text-sm text-gray-500">Classe funcional na carreira do magistério</p>
+                </div>
+              </div>
+
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Selecione a classe</mat-label>
+                <mat-select formControlName="classe">
+                  @for (c of classes; track c.value) {
+                    <mat-option [value]="c.value">{{ c.label }}</mat-option>
+                  }
+                </mat-select>
+                @if (form.get('classe')?.touched && form.get('classe')?.invalid) {
+                  <mat-error>Selecione a classe.</mat-error>
+                }
+              </mat-form-field>
+            </section>
+
+            <!-- 4. Nível -->
+            <section class="py-6">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="bg-gray-100 rounded-lg p-2.5 flex items-center justify-center">
+                  <mat-icon class="!text-gray-600 !w-5 !h-5 !text-[20px]">bar_chart</mat-icon>
+                </div>
+                <div>
+                  <h2 class="font-semibold text-gray-800">Nível ou Referência</h2>
+                  <p class="text-sm text-gray-500">Nível de progressão horizontal na carreira</p>
+                </div>
+              </div>
+
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Selecione o nível</mat-label>
+                <mat-select formControlName="nivel">
+                  @for (n of niveis; track n.value) {
+                    <mat-option [value]="n.value">{{ n.label }}</mat-option>
+                  }
+                </mat-select>
+                @if (form.get('nivel')?.touched && form.get('nivel')?.invalid) {
+                  <mat-error>Selecione o nível.</mat-error>
+                }
+              </mat-form-field>
+            </section>
+
+            <!-- 5. Titulação acadêmica -->
+            <section class="py-6">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="bg-gray-100 rounded-lg p-2.5 flex items-center justify-center">
+                  <mat-icon class="!text-gray-600 !w-5 !h-5 !text-[20px]">school</mat-icon>
+                </div>
+                <div>
+                  <h2 class="font-semibold text-gray-800">Titulação Acadêmica</h2>
+                  <p class="text-sm text-gray-500">Maior grau acadêmico reconhecido pela SEDUC-PA</p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                @for (t of titulacoes; track t.value) {
+                  <button
+                    type="button"
+                    (click)="selecionarTitulacao(t.value)"
+                    class="flex items-center gap-3 rounded-lg border p-4 text-left transition-colors cursor-pointer"
+                    [class.bg-blue-900]="form.value.titulacao === t.value"
+                    [class.border-blue-900]="form.value.titulacao === t.value"
+                    [class.text-white]="form.value.titulacao === t.value"
+                    [class.bg-gray-50]="form.value.titulacao !== t.value"
+                    [class.border-gray-200]="form.value.titulacao !== t.value"
+                    [class.hover:border-blue-300]="form.value.titulacao !== t.value"
+                  >
+                    @switch (t.value) {
+                      @case ('graduacao') {
+                        <mat-icon class="!w-[22px] !h-[22px] !text-[22px] shrink-0">school</mat-icon>
+                      }
+                      @case ('especializacao') {
+                        <mat-icon class="!w-[22px] !h-[22px] !text-[22px] shrink-0">menu_book</mat-icon>
+                      }
+                      @case ('mestrado') {
+                        <mat-icon class="!w-[22px] !h-[22px] !text-[22px] shrink-0">bar_chart</mat-icon>
+                      }
+                      @case ('doutorado') {
+                        <mat-icon class="!w-[22px] !h-[22px] !text-[22px] shrink-0">apartment</mat-icon>
+                      }
+                    }
+                    <div>
+                      <p class="font-semibold">{{ t.label }}</p>
+                      <p
+                        class="text-sm"
+                        [class.text-blue-100]="form.value.titulacao === t.value"
+                        [class.text-gray-500]="form.value.titulacao !== t.value"
+                      >
+                        {{ t.descricao }}
+                      </p>
+                    </div>
+                  </button>
+                }
+              </div>
+
+              @if (form.get('titulacao')?.touched && form.get('titulacao')?.invalid) {
+                <p class="text-red-600 text-sm mt-2">Selecione a titulação acadêmica.</p>
+              }
+            </section>
+
+            <!-- Dependentes (opcional, usado apenas no cálculo do Imposto de Renda) -->
+            <section class="py-6">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="bg-gray-100 rounded-lg p-2.5 flex items-center justify-center">
+                  <mat-icon class="!text-gray-600 !w-5 !h-5 !text-[20px]">groups</mat-icon>
+                </div>
+                <div>
+                  <h2 class="font-semibold text-gray-800">Dependentes</h2>
+                  <p class="text-sm text-gray-500">Opcional — utilizado apenas na dedução do Imposto de Renda</p>
+                </div>
+              </div>
+
+              <mat-form-field appearance="outline" class="w-full sm:w-40">
+                <mat-label>Dependentes</mat-label>
+                <input matInput type="number" min="0" formControlName="dependentes" />
+              </mat-form-field>
+            </section>
+          </div>
+
+          <!-- 6. Botão calcular -->
+          <div class="pt-6">
+            <button
+              mat-flat-button
+              type="submit"
+              [disabled]="form.invalid"
+              class="w-full !bg-green-600 !text-white hover:!bg-green-700 !py-6 !text-lg !font-semibold disabled:!bg-gray-300 disabled:!text-gray-500"
+            >
+              <span class="flex items-center justify-center gap-2">
+                <mat-icon>calculate</mat-icon>
+                Calcular Remuneração Estimada
+              </span>
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- 7. Resultado -->
+    @if (resultado(); as r) {
+      <mat-card class="!shadow-sm">
+        <mat-card-content>
+          <h2 class="text-lg font-bold text-gray-800 mb-4">Resultado da Estimativa</h2>
+
+          <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Proventos</h3>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-gray-600">Vencimento base ({{ r.jornadaMensal }}h mensais)</span>
+              <span class="font-medium">{{ r.vencimentoBase | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}</span>
+            </div>
+            @if (r.horasExtrapolacao > 0) {
+              <div class="flex justify-between">
+                <span class="text-gray-600">Aulas suplementares ({{ r.horasExtrapolacao }}h + hora-atividade)</span>
+                <span class="font-medium">{{ r.aulasSuplementares | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}</span>
+              </div>
+            }
+            <div class="flex justify-between">
+              <span class="text-gray-600">Gratificação de titularidade</span>
+              <span class="font-medium">{{ r.gratificacaoTitularidade | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Gratificação de escolaridade</span>
+              <span class="font-medium">{{ r.gratificacaoEscolaridade | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Adicional de tempo de serviço ({{ r.trienios }} triênios)</span>
+              <span class="font-medium">{{ r.adicionalTempoServico | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Gratificação de magistério / VPNI</span>
+              <span class="font-medium">{{ r.gratificacaoMagisterioVpni | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Auxílio-alimentação</span>
+              <span class="font-medium">{{ r.auxilioAlimentacao | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}</span>
+            </div>
+          </div>
+
+          <mat-divider class="!my-4" />
+
+          <div class="flex justify-between items-baseline mb-6">
+            <span class="font-semibold text-gray-800">Remuneração Bruta</span>
+            <span class="text-xl font-bold text-gray-900">{{ r.remuneracaoBruta | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}</span>
+          </div>
+
+          <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Descontos</h3>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-gray-600">FINANPREV (14%)</span>
+              <span class="font-medium text-red-600">- {{ r.finanprev | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Imposto de Renda</span>
+              @if (r.irTabelaConfirmada) {
+                <span class="font-medium text-red-600">- {{ r.impostoRenda | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}</span>
+              } @else {
+                <span class="font-medium text-amber-600">a confirmar</span>
+              }
+            </div>
+          </div>
+
+          @if (!r.irTabelaConfirmada) {
+            <div class="flex gap-3 items-start rounded-lg border border-amber-200 bg-amber-50 p-4 mt-3">
+              <mat-icon class="!text-amber-700 !w-[18px] !h-[18px] !text-[18px] mt-0.5 shrink-0">warning</mat-icon>
+              <p class="text-sm leading-relaxed text-amber-900">
+                A base de cálculo do IR ({{ r.baseIR | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}) ficou abaixo de
+                R$ 4.664,68, faixa da tabela do IRRF que não foi informada no documento de regras. O Imposto de Renda não foi
+                deduzido nesta simulação até que essa faixa seja confirmada.
+              </p>
+            </div>
+          }
+
+          <mat-divider class="!my-4" />
+
+          <div class="flex justify-between items-baseline mb-6">
+            <span class="font-semibold text-gray-800">Total de Descontos</span>
+            <span class="text-xl font-bold text-red-600">
+              - {{ r.totalDescontos | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
+            </span>
+          </div>
+
+          <div class="bg-green-50 border border-green-200 rounded-lg p-5 flex justify-between items-center">
+            <span class="font-semibold text-green-900">Remuneração Líquida Estimada</span>
+            <span class="text-2xl font-bold text-green-700">
+              {{ r.remuneracaoLiquida | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
+            </span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+  </main>
+</div>
