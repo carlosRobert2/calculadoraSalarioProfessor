@@ -6,7 +6,6 @@ dist
 .vscode
 .editorconfig
 .prettierrc
-.postcssrc.json
 README.md
 *.md
 npm-debug.log*
