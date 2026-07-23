@@ -1,0 +1,13 @@
+node_modules
+dist
+.angular
+.git
+.gitignore
+.vscode
+.editorconfig
+.prettierrc
+.postcssrc.json
+README.md
+*.md
+npm-debug.log*
+.claude

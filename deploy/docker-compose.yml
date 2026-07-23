@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - backend
+
+  api:
+    # serviço já existente na VPS - manter a configuração atual sem alterações
+    networks:
+      - backend
+
+  calculadora:
+    build:
+      context: ./calsal2
+      dockerfile: Dockerfile
+    container_name: calculadora
+    restart: unless-stopped
+    networks:
+      - backend
+    # nenhuma porta publicada: o Caddy acessa via rede interna "backend" em calculadora:80
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:
