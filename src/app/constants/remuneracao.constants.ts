@@ -11,6 +11,8 @@ export interface Jornada {
   limiteMinimoHoras: number;
   /** horas mensais que definem a jornada (100, 150 ou 200) */
   horasMensais: number;
+  /** horas de regência de referência (75% da jornada) a partir das quais as horas passam a ser aula suplementar */
+  horasRegenciaBase: number;
   /** vencimento base de referência (classe I, nível A) para esta jornada */
   vencimentoBase: number;
 }
@@ -43,9 +45,9 @@ export const LIMITE_CARGA_HORARIA_MENSAL = 220;
 // Ordenado da maior para a menor jornada: a primeira faixa cujo limite mínimo
 // a carga horária atende é a jornada do professor.
 export const JORNADAS: Jornada[] = [
-  { limiteMinimoHoras: 150, horasMensais: 200, vencimentoBase: 4881.82 },
-  { limiteMinimoHoras: 112.5, horasMensais: 150, vencimentoBase: 3661.37 },
-  { limiteMinimoHoras: 0, horasMensais: 100, vencimentoBase: 2440.91 },
+  { limiteMinimoHoras: 150, horasMensais: 200, horasRegenciaBase: 150, vencimentoBase: 4881.82 },
+  { limiteMinimoHoras: 112.5, horasMensais: 150, horasRegenciaBase: 112.5, vencimentoBase: 3661.37 },
+  { limiteMinimoHoras: 0, horasMensais: 100, horasRegenciaBase: 75, vencimentoBase: 2440.91 },
 ];
 
 export const PERCENTUAL_HORA_ATIVIDADE = 0.2;

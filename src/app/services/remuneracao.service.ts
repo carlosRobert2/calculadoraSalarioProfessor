@@ -29,7 +29,7 @@ export class RemuneracaoService {
       1 + classeIndex * PERCENTUAL_PROGRESSAO_VERTICAL_POR_CLASSE + nivelIndex * PERCENTUAL_PROGRESSAO_HORIZONTAL_POR_NIVEL;
     const vencimentoBase = jornada.vencimentoBase * multiplicadorProgressao;
 
-    const horasExtrapolacao = Math.max(0, professor.cargaHorariaMensal - jornada.limiteMinimoHoras);
+    const horasExtrapolacao = Math.max(0, professor.cargaHorariaMensal - jornada.horasRegenciaBase);
     const horasAtividade = horasExtrapolacao * PERCENTUAL_HORA_ATIVIDADE;
     const horasAulaSuplementar = horasExtrapolacao + horasAtividade;
     const aulasSuplementares = horasExtrapolacao > 0 ? (vencimentoBase / jornada.horasMensais) * horasAulaSuplementar : 0;
