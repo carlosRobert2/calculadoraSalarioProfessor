@@ -1,5 +1,5 @@
 import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
-import { Calc } from "./componets/calc/calc";
+import { Calc } from "./components/calc/calc";
 
 @Component({
   selector: 'app-root',
