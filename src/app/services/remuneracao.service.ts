@@ -35,10 +35,11 @@ export class RemuneracaoService {
     const aulasSuplementares = horasExtrapolacao > 0 ? (vencimentoBase / jornada.horasMensais) * horasAulaSuplementar : 0;
 
     const titulacao = TITULACOES.find((t) => t.value === professor.titulacao)!;
-    // Art. 31 da Lei nº 7422/2010: a gratificação de titularidade incide sobre o
-    // vencimento base do CARGO (jornada, Classe I/Nível A), não sobre o vencimento
-    // já progredido do professor (que varia conforme classe e nível).
-    const gratificacaoTitularidade = jornada.vencimentoBase * titulacao.percentual;
+    // A gratificação de titularidade é um valor fixo em tabela, definido pela
+    // titulação e pela carga horária mensal do professor (não mais um percentual
+    // sobre o vencimento base).
+    const faixaTitularidade = titulacao.faixas.find((f) => professor.cargaHorariaMensal >= f.limiteMinimoHoras);
+    const gratificacaoTitularidade = faixaTitularidade?.valor ?? 0;
 
     const gratificacaoEscolaridade = vencimentoBase * PERCENTUAL_GRATIFICACAO_ESCOLARIDADE;
 

@@ -17,12 +17,24 @@ export interface Jornada {
   vencimentoBase: number;
 }
 
+export interface FaixaGratificacaoTitularidade {
+  /** carga horária mensal mínima (inclusive) para esta faixa se aplicar */
+  limiteMinimoHoras: number;
+  /** valor fixo (R$) da gratificação de titularidade nesta faixa */
+  valor: number;
+}
+
 export interface Titulacao {
   value: string;
   label: string;
   descricao: string;
-  /** percentual da gratificação de titularidade sobre o vencimento base do CARGO (não o vencimento progredido do professor) */
-  percentual: number;
+  /**
+   * Faixas de valor fixo da gratificação de titularidade, de acordo com a
+   * carga horária mensal do professor. Ordenadas da maior para a menor
+   * faixa: a primeira cujo limite mínimo a carga horária atende é a faixa
+   * aplicável. Vazio para titulações sem gratificação (ex.: graduação).
+   */
+  faixas: FaixaGratificacaoTitularidade[];
 }
 
 export interface FaixaMagisterioVpni {
@@ -67,10 +79,37 @@ export const NIVEIS: OpcaoSelecao[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', '
 );
 
 export const TITULACOES: Titulacao[] = [
-  { value: 'graduacao', label: 'Licenciatura / Graduação', descricao: 'Sem gratificação de titularidade', percentual: 0 },
-  { value: 'especializacao', label: 'Especialização em Educação', descricao: '+10% sobre o vencimento base', percentual: 0.1 },
-  { value: 'mestrado', label: 'Mestrado', descricao: '+20% sobre o vencimento base', percentual: 0.2 },
-  { value: 'doutorado', label: 'Doutorado', descricao: '+30% sobre o vencimento base', percentual: 0.3 },
+  { value: 'graduacao', label: 'Licenciatura / Graduação', descricao: 'Sem gratificação de titularidade', faixas: [] },
+  {
+    value: 'especializacao',
+    label: 'Especialização em Educação',
+    descricao: 'R$ 185,70 a R$ 457,95 conforme a carga horária mensal',
+    faixas: [
+      { limiteMinimoHoras: 151, valor: 457.95 },
+      { limiteMinimoHoras: 101, valor: 243.52 },
+      { limiteMinimoHoras: 0, valor: 185.7 },
+    ],
+  },
+  {
+    value: 'mestrado',
+    label: 'Mestrado',
+    descricao: 'R$ 361,68 a R$ 888,92 conforme a carga horária mensal',
+    faixas: [
+      { limiteMinimoHoras: 151, valor: 888.92 },
+      { limiteMinimoHoras: 101, valor: 486.26 },
+      { limiteMinimoHoras: 0, valor: 361.68 },
+    ],
+  },
+  {
+    value: 'doutorado',
+    label: 'Doutorado',
+    descricao: 'R$ 550,66 a R$ 1.370,98 conforme a carga horária mensal',
+    faixas: [
+      { limiteMinimoHoras: 151, valor: 1370.98 },
+      { limiteMinimoHoras: 101, valor: 806.06 },
+      { limiteMinimoHoras: 0, valor: 550.66 },
+    ],
+  },
 ];
 
 export const PERCENTUAL_GRATIFICACAO_ESCOLARIDADE = 0.8;
